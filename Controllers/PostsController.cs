@@ -114,6 +114,15 @@ namespace BagaarBlogApi.Controllers
             }
         }
 
+        // GET api/posts/5/comments
+        [HttpGet("{postId}/comments")]
+        public ActionResult<IEnumerable<Comment>> GetComments(int postId)
+        {
+            return _context.Comments
+                .Where(comment => comment.PostId == postId)
+                .OrderByDescending(comment => comment.Created).ToList();
+        }
+
         // POST api/posts/5/comments
         [HttpPost("{postId}/comments")]
         public ActionResult<CommentViewModel> PostComment(int postId, [FromBody] CreateCommentViewModel createComment)
