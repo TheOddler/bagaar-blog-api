@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BagaarBlogApi.Models;
+using BagaarBlogApi.Repositories;
 using BagaarBlogApi.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +14,14 @@ namespace BagaarBlogApi.Controllers
     [ApiController]
     public class PostsController : ControllerBase
     {
-        private readonly BlogContext _context;
+        private readonly IRepository<Post> _postsRepo;
+        private readonly IRepository<Comment> _commentsRepo;
         private readonly CommentsController _commentsController;
 
-        public PostsController(BlogContext context, CommentsController commentsController)
+        public PostsController(IRepository<Post> postsRepo, IRepository<Comment> commentsRepo, CommentsController commentsController)
         {
-            _context = context;
+            _postsRepo = postsRepo;
+            _commentsRepo = commentsRepo;
             _commentsController = commentsController;
         }
 
@@ -27,7 +30,7 @@ namespace BagaarBlogApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<PostViewModel>> Get([FromQuery] string title)
         {
-            IQueryable<Post> posts = _context.Posts.OrderByDescending(p => p.Created);
+            IQueryable<Post> posts = _postsRepo.GetAll();
 
             if (title != null)
             {
@@ -41,7 +44,7 @@ namespace BagaarBlogApi.Controllers
         [HttpGet("{id}")]
         public ActionResult<PostViewModel> Get(int id)
         {
-            Post post = _context.Posts.Find(id);
+            Post post = _postsRepo.Get(id);
 
             if (post == null)
             {
@@ -59,11 +62,7 @@ namespace BagaarBlogApi.Controllers
         {
             try
             {
-                post.Created = DateTime.Now;
-
-                _context.Posts.Add(post);
-                _context.SaveChanges();
-
+                _postsRepo.Create(post);
                 return CreatedAtAction("Get", new Post { Id = post.Id }, new PostViewModel(post));
             }
             // TODO: Better exception handling, for instance when there is an id conflict return a `Conflict`
@@ -84,9 +83,7 @@ namespace BagaarBlogApi.Controllers
 
             try
             {
-                _context.Entry(post).State = EntityState.Modified;
-                _context.SaveChanges();
-
+                _postsRepo.Update(post);
                 return NoContent();
             }
             // TODO: Better exception handling, for instance when there is an id conflict return a `Conflict`
@@ -100,17 +97,15 @@ namespace BagaarBlogApi.Controllers
         [HttpDelete("{id}")]
         public ActionResult<PostViewModel> Delete(int id)
         {
-            Post post = _context.Posts.Find(id);
+            Post deleted = _postsRepo.Delete(id);
 
-            if (post == null)
+            if (deleted != null)
             {
-                return NotFound();
+                return new PostViewModel(deleted);
             }
             else
             {
-                _context.Posts.Remove(post);
-                _context.SaveChanges();
-                return new PostViewModel(post);
+                return NotFound();
             }
         }
 
@@ -118,11 +113,13 @@ namespace BagaarBlogApi.Controllers
 
         // GET api/posts/5/comments
         [HttpGet("{postId}/comments")]
-        public ActionResult<IEnumerable<Comment>> GetComments(int postId)
+        public ActionResult<IEnumerable<CommentViewModel>> GetComments(int postId)
         {
-            return _context.Comments
+            return _commentsRepo
+                .GetAll()
                 .Where(comment => comment.PostId == postId)
-                .OrderByDescending(comment => comment.Created).ToList();
+                .Select(comment => new CommentViewModel(comment))
+                .ToList();
         }
 
         // POST api/posts/5/comments

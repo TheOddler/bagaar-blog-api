@@ -10,7 +10,6 @@ namespace BagaarBlogApi.Models
 
         public BlogContext(DbContextOptions<BlogContext> options) : base(options)
         {
-
         }
     }
 }
