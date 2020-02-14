@@ -23,7 +23,7 @@ It should be possible to:
 `POST api/posts` with body:
 
     {
-    	"title": "<title>",
+        "title": "<title>",
         "content": "<content>"
     }
 
@@ -41,7 +41,7 @@ It should be possible to:
 
     {
         "id": <id>
-    	"title": "<title>",
+        "title": "<title>",
         "content": "<content>"
     }
 
