@@ -116,13 +116,22 @@ namespace BagaarBlogApi.Controllers
 
         // POST api/posts/5/comments
         [HttpPost("{postId}/comments")]
-        public ActionResult<CommentViewModel> PostComment(int postId, [FromBody] Comment comment)
+        public ActionResult<CommentViewModel> PostComment(int postId, [FromBody] CreateCommentViewModel createComment)
         {
-            if (postId != comment.PostId)
+            if (createComment.PostId == null)
+            {
+                createComment.PostId = postId;
+            }
+            else if (postId != createComment.PostId)
             {
                 return BadRequest("Inconsistent ids");
             }
 
+            Comment comment = new Comment
+            {
+                Content = createComment.Content,
+                PostId = createComment.PostId.Value
+            };
             return _commentsController.Post(comment);
         }
     }

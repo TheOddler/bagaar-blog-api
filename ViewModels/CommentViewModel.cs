@@ -16,7 +16,5 @@ namespace BagaarBlogApi.ViewModels
         {
             _comment = comment;
         }
-
-        public static implicit operator CommentViewModel(Comment c) => new CommentViewModel(c);
     }
 }
