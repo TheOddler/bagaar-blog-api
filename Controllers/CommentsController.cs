@@ -23,7 +23,7 @@ namespace BagaarBlogApi.Controllers
         // GET api/comments
         // GET api/comments?postId=optional
         [HttpGet]
-        public ActionResult<IEnumerable<Comment>> Get([FromQuery] int? postId)
+        public ActionResult<IEnumerable<CommentViewModel>> Get([FromQuery] int? postId)
         {
             IQueryable<Comment> comments = _context.Comments;
 
@@ -32,7 +32,10 @@ namespace BagaarBlogApi.Controllers
                 comments = comments.Where(comment => comment.PostId == postId);
             }
 
-            return comments.OrderByDescending(comment => comment.Created).ToList();
+            return comments
+                .OrderByDescending(comment => comment.Created)
+                .Select(comment => new CommentViewModel(comment))
+                .ToList();
         }
 
         // GET api/comments/5

@@ -25,21 +25,21 @@ namespace BagaarBlogApi.Controllers
         // GET api/posts
         // GET api/posts?title=optional
         [HttpGet]
-        public ActionResult<IEnumerable<Post>> Get([FromQuery] string title)
+        public ActionResult<IEnumerable<PostViewModel>> Get([FromQuery] string title)
         {
-            IQueryable<Post> posts = _context.Posts;
+            IQueryable<Post> posts = _context.Posts.OrderByDescending(p => p.Created);
 
             if (title != null)
             {
                 posts = posts.Where(post => post.Title.Contains(title));
             }
 
-            return posts.OrderByDescending(post => post.Created).ToList();
+            return posts.Select(p => new PostViewModel(p)).ToList();
         }
 
         // GET api/posts/5
         [HttpGet("{id}")]
-        public ActionResult<Post> Get(int id)
+        public ActionResult<PostViewModel> Get(int id)
         {
             Post post = _context.Posts.Find(id);
 
@@ -49,13 +49,13 @@ namespace BagaarBlogApi.Controllers
             }
             else
             {
-                return post;
+                return new PostViewModel(post);
             }
         }
 
         // POST api/posts
         [HttpPost]
-        public ActionResult<Post> Post([FromBody] Post post)
+        public ActionResult<PostViewModel> Post([FromBody] Post post)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace BagaarBlogApi.Controllers
                 _context.Posts.Add(post);
                 _context.SaveChanges();
 
-                return CreatedAtAction("Get", new Post { Id = post.Id }, post);
+                return CreatedAtAction("Get", new Post { Id = post.Id }, new PostViewModel(post));
             }
             // TODO: Better exception handling, for instance when there is an id conflict return a `Conflict`
             catch (Exception e)
@@ -75,7 +75,7 @@ namespace BagaarBlogApi.Controllers
 
         // PUT api/posts/5
         [HttpPut("{id}")]
-        public ActionResult<Post> Put(int id, [FromBody] Post post)
+        public ActionResult<PostViewModel> Put(int id, [FromBody] Post post)
         {
             if (id != post.Id)
             {
@@ -98,7 +98,7 @@ namespace BagaarBlogApi.Controllers
 
         // DELETE api/posts/5
         [HttpDelete("{id}")]
-        public ActionResult<Post> Delete(int id)
+        public ActionResult<PostViewModel> Delete(int id)
         {
             Post post = _context.Posts.Find(id);
 
@@ -110,7 +110,7 @@ namespace BagaarBlogApi.Controllers
             {
                 _context.Posts.Remove(post);
                 _context.SaveChanges();
-                return post;
+                return new PostViewModel(post);
             }
         }
 
