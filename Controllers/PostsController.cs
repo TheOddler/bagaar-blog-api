@@ -20,10 +20,18 @@ namespace BagaarBlogApi.Controllers
         }
 
         // GET api/posts
+        // GET api/posts?title=optional
         [HttpGet]
-        public ActionResult<IEnumerable<Post>> Get()
+        public ActionResult<IEnumerable<Post>> Get([FromQuery] string title)
         {
-            return _context.Posts.OrderByDescending(post => post.Created).ToList();
+            IQueryable<Post> posts = _context.Posts;
+
+            if (title != null)
+            {
+                posts = posts.Where(post => post.Title.Contains(title));
+            }
+
+            return posts.OrderByDescending(post => post.Created).ToList();
         }
 
         // GET api/posts/5
@@ -102,7 +110,5 @@ namespace BagaarBlogApi.Controllers
                 return post;
             }
         }
-
-        // TODO: Get posts based on title
     }
 }
