@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BagaarBlogApi.Models;
@@ -25,7 +26,7 @@ namespace BagaarBlogApi.Services
                 posts = posts.Where(post => post.Title.Contains(partialTitle));
             }
 
-            return posts;
+            return posts.OrderByDescending(p => p.Created);
         }
 
         public Post Get(int id)
@@ -35,6 +36,7 @@ namespace BagaarBlogApi.Services
 
         public bool Create(Post post)
         {
+            post.Created = DateTime.Now;
             return _postsRepo.Create(post);
         }
 

@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BagaarBlogApi.Models;
@@ -24,7 +25,7 @@ namespace BagaarBlogApi.Services
                 comments = comments.Where(comment => comment.PostId == postId);
             }
 
-            return comments;
+            return comments.OrderByDescending(c => c.Created);
         }
 
         public Comment Get(int id)
@@ -34,6 +35,7 @@ namespace BagaarBlogApi.Services
 
         public bool Create(Comment comment)
         {
+            comment.Created = DateTime.Now;
             return _commentsRepo.Create(comment);
         }
     }
