@@ -28,7 +28,9 @@ namespace BagaarBlogApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<BlogContext>(opt => opt.UseSqlite(Configuration["Data:BagaarBlogApiConnection:ConnectionString"]));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+                .AddControllersAsServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

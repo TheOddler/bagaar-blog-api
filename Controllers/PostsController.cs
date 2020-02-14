@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BagaarBlogApi.Models;
+using BagaarBlogApi.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,10 +14,12 @@ namespace BagaarBlogApi.Controllers
     public class PostsController : ControllerBase
     {
         private readonly BlogContext _context;
+        private readonly CommentsController _commentsController;
 
-        public PostsController(BlogContext context)
+        public PostsController(BlogContext context, CommentsController commentsController)
         {
             _context = context;
+            _commentsController = commentsController;
         }
 
         // GET api/posts
@@ -109,6 +112,18 @@ namespace BagaarBlogApi.Controllers
                 _context.SaveChanges();
                 return post;
             }
+        }
+
+        // POST api/posts/5/comments
+        [HttpPost("{postId}/comments")]
+        public ActionResult<CommentViewModel> PostComment(int postId, [FromBody] Comment comment)
+        {
+            if (postId != comment.PostId)
+            {
+                return BadRequest("Inconsistent ids");
+            }
+
+            return _commentsController.Post(comment);
         }
     }
 }
