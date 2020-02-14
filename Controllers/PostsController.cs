@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using BagaarBlogApi.Models;
-using BagaarBlogApi.Repositories;
+using BagaarBlogApi.Services;
 using BagaarBlogApi.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BagaarBlogApi.Controllers
 {
@@ -14,14 +12,14 @@ namespace BagaarBlogApi.Controllers
     [ApiController]
     public class PostsController : ControllerBase
     {
-        private readonly IRepository<Post> _postsRepo;
-        private readonly IRepository<Comment> _commentsRepo;
+        private readonly IPostsService _postsService;
+        private readonly ICommentsService _commentsService;
         private readonly CommentsController _commentsController;
 
-        public PostsController(IRepository<Post> postsRepo, IRepository<Comment> commentsRepo, CommentsController commentsController)
+        public PostsController(IPostsService postsService, ICommentsService commentsService, CommentsController commentsController)
         {
-            _postsRepo = postsRepo;
-            _commentsRepo = commentsRepo;
+            _postsService = postsService;
+            _commentsService = commentsService;
             _commentsController = commentsController;
         }
 
@@ -30,21 +28,17 @@ namespace BagaarBlogApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<PostViewModel>> Get([FromQuery] string title)
         {
-            IQueryable<Post> posts = _postsRepo.GetAll();
-
-            if (title != null)
-            {
-                posts = posts.Where(post => post.Title.Contains(title));
-            }
-
-            return posts.Select(p => new PostViewModel(p)).ToList();
+            return _postsService
+                .GetAll(title)
+                .Select(p => new PostViewModel(p))
+                .ToList();
         }
 
         // GET api/posts/5
         [HttpGet("{id}")]
         public ActionResult<PostViewModel> Get(int id)
         {
-            Post post = _postsRepo.Get(id);
+            Post post = _postsService.Get(id);
 
             if (post == null)
             {
@@ -62,7 +56,7 @@ namespace BagaarBlogApi.Controllers
         {
             try
             {
-                _postsRepo.Create(post);
+                _postsService.Create(post);
                 return CreatedAtAction("Get", new Post { Id = post.Id }, new PostViewModel(post));
             }
             // TODO: Better exception handling, for instance when there is an id conflict return a `Conflict`
@@ -83,7 +77,7 @@ namespace BagaarBlogApi.Controllers
 
             try
             {
-                _postsRepo.Update(post);
+                _postsService.Update(post);
                 return NoContent();
             }
             // TODO: Better exception handling, for instance when there is an id conflict return a `Conflict`
@@ -97,7 +91,7 @@ namespace BagaarBlogApi.Controllers
         [HttpDelete("{id}")]
         public ActionResult<PostViewModel> Delete(int id)
         {
-            Post deleted = _postsRepo.Delete(id);
+            Post deleted = _postsService.Delete(id);
 
             if (deleted != null)
             {
@@ -115,9 +109,8 @@ namespace BagaarBlogApi.Controllers
         [HttpGet("{postId}/comments")]
         public ActionResult<IEnumerable<CommentViewModel>> GetComments(int postId)
         {
-            return _commentsRepo
-                .GetAll()
-                .Where(comment => comment.PostId == postId)
+            return _commentsService
+                .GetAll(postId)
                 .Select(comment => new CommentViewModel(comment))
                 .ToList();
         }

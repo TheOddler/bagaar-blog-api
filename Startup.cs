@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BagaarBlogApi.Models;
 using BagaarBlogApi.Repositories;
+using BagaarBlogApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -31,6 +32,8 @@ namespace BagaarBlogApi
             services.AddDbContext<BlogContext>(opt => opt.UseSqlite(Configuration["Data:BagaarBlogApiConnection:ConnectionString"]));
             services.AddScoped<IRepository<Post>, PostsRepository>();
             services.AddScoped<IRepository<Comment>, CommentsRepository>();
+            services.AddScoped<IPostsService, PostsService>();
+            services.AddScoped<ICommentsService, CommentsService>();
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddControllersAsServices();

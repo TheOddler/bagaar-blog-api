@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using BagaarBlogApi.Models;
-using BagaarBlogApi.Repositories;
+using BagaarBlogApi.Services;
 using BagaarBlogApi.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BagaarBlogApi.Controllers
 {
@@ -14,11 +12,11 @@ namespace BagaarBlogApi.Controllers
     [ApiController]
     public class CommentsController : ControllerBase
     {
-        private readonly IRepository<Comment> _commentsRepo;
+        private readonly ICommentsService _commentsService;
 
-        public CommentsController(IRepository<Comment> commentsRepo)
+        public CommentsController(ICommentsService commentsService)
         {
-            _commentsRepo = commentsRepo;
+            _commentsService = commentsService;
         }
 
         // GET api/comments
@@ -26,14 +24,7 @@ namespace BagaarBlogApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<CommentViewModel>> Get([FromQuery] int? postId)
         {
-            IQueryable<Comment> comments = _commentsRepo.GetAll();
-
-            if (postId != null)
-            {
-                comments = comments.Where(comment => comment.PostId == postId);
-            }
-
-            return comments
+            return _commentsService.GetAll(postId)
                 .Select(comment => new CommentViewModel(comment))
                 .ToList();
         }
@@ -42,7 +33,7 @@ namespace BagaarBlogApi.Controllers
         [HttpGet("{id}")]
         public ActionResult<CommentViewModel> Get(int id)
         {
-            Comment comment = _commentsRepo.Get(id);
+            Comment comment = _commentsService.Get(id);
 
             if (comment == null)
             {
@@ -60,7 +51,7 @@ namespace BagaarBlogApi.Controllers
         {
             try
             {
-                bool success = _commentsRepo.Create(comment);
+                bool success = _commentsService.Create(comment);
 
                 if (success)
                 {
