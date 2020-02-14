@@ -114,6 +114,8 @@ namespace BagaarBlogApi.Controllers
             }
         }
 
+        // Extra api endpoints for comments of specific posts
+
         // GET api/posts/5/comments
         [HttpGet("{postId}/comments")]
         public ActionResult<IEnumerable<Comment>> GetComments(int postId)
