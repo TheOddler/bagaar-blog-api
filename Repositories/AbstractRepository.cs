@@ -16,13 +16,13 @@ namespace BagaarBlogApi.Repositories
             _context = context;
         }
 
-        public bool Create(T item)
+        virtual public bool Create(T item)
         {
             DbSet.Add(item);
             return SaveChanges();
         }
 
-        public T Delete(int id)
+        virtual public T Delete(int id)
         {
             T item = Get(id);
 
@@ -35,22 +35,22 @@ namespace BagaarBlogApi.Repositories
             return item;
         }
 
-        public T Get(int id)
+        virtual public T Get(int id)
         {
             return DbSet.Find(id);
         }
 
-        public IQueryable<T> GetAll()
+        virtual public IQueryable<T> GetAll()
         {
             return DbSet;
         }
 
-        public bool SaveChanges()
+        virtual public bool SaveChanges()
         {
             return _context.SaveChanges() > 0;
         }
 
-        public bool Update(T item)
+        virtual public bool Update(T item)
         {
             _context.Entry(item).State = EntityState.Modified;
             return SaveChanges();

@@ -12,5 +12,12 @@ namespace BagaarBlogApi.Repositories
         public CommentsRepository(BlogContext context) : base(context)
         {
         }
+
+        public override bool Update(Comment comment)
+        {
+            _context.Entry(comment).State = EntityState.Modified;
+            _context.Entry(comment).Property(c => c.Created).IsModified = false;
+            return SaveChanges();
+        }
     }
 }

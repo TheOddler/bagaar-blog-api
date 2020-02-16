@@ -12,5 +12,12 @@ namespace BagaarBlogApi.Repositories
         public PostsRepository(BlogContext context) : base(context)
         {
         }
+
+        public override bool Update(Post post)
+        {
+            _context.Entry(post).State = EntityState.Modified;
+            _context.Entry(post).Property(p => p.Created).IsModified = false;
+            return SaveChanges();
+        }
     }
 }
