@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using BagaarBlogApi.Models;
 using BagaarBlogApi.Services;
 using BagaarBlogApi.ViewModels;
@@ -22,11 +23,19 @@ namespace BagaarBlogApi.Controllers
         // GET api/comments
         // GET api/comments?postId=optional
         [HttpGet]
-        public ActionResult<IEnumerable<CommentViewModel>> Get([FromQuery] int? postId)
+        public ActionResult<IEnumerable<CommentViewModel>> GetAll([FromQuery] int? postId)
         {
-            return _commentsService.GetAll(postId)
+            var comments = _commentsService.GetAll(postId)
                 .Select(comment => new CommentViewModel(comment))
                 .ToList();
+            if (comments.Count == 0)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return comments;
+            }
         }
 
         // GET api/comments/5
@@ -65,7 +74,11 @@ namespace BagaarBlogApi.Controllers
             // TODO: Better exception handling, for instance when there is an id conflict return a `Conflict`
             catch (Exception e)
             {
-                return BadRequest($"{e.Message}: {e.InnerException?.Message}");
+                return BadRequest(new
+                {
+                    status = HttpStatusCode.BadRequest,
+                    message = $"{e.Message}: {e.InnerException?.Message}"
+                });
             }
         }
     }

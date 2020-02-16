@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using BagaarBlogApi.Models;
 using BagaarBlogApi.Services;
 using BagaarBlogApi.ViewModels;
@@ -26,12 +27,20 @@ namespace BagaarBlogApi.Controllers
         // GET api/posts
         // GET api/posts?title=optional
         [HttpGet]
-        public ActionResult<IEnumerable<PostViewModel>> Get([FromQuery] string title)
+        public ActionResult<IEnumerable<PostViewModel>> GetAll([FromQuery] string title)
         {
-            return _postsService
+            var posts = _postsService
                 .GetAll(title)
                 .Select(p => new PostViewModel(p))
                 .ToList();
+            if (posts.Count == 0)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return posts;
+            }
         }
 
         // GET api/posts/5
@@ -72,7 +81,11 @@ namespace BagaarBlogApi.Controllers
         {
             if (id != post.Id)
             {
-                return BadRequest("Inconsistent ids");
+                return BadRequest(new
+                {
+                    status = HttpStatusCode.BadRequest,
+                    message = "Inconsistent ids"
+                });
             }
 
             try
@@ -83,7 +96,11 @@ namespace BagaarBlogApi.Controllers
             // TODO: Better exception handling, for instance when there is an id conflict return a `Conflict`
             catch (Exception e)
             {
-                return BadRequest($"{e.Message}: {e.InnerException?.Message}");
+                return BadRequest(new
+                {
+                    status = HttpStatusCode.BadRequest,
+                    message = $"{e.Message}: {e.InnerException?.Message}"
+                });
             }
         }
 
@@ -109,10 +126,7 @@ namespace BagaarBlogApi.Controllers
         [HttpGet("{postId}/comments")]
         public ActionResult<IEnumerable<CommentViewModel>> GetComments(int postId)
         {
-            return _commentsService
-                .GetAll(postId)
-                .Select(comment => new CommentViewModel(comment))
-                .ToList();
+            return _commentsController.GetAll(postId);
         }
 
         // POST api/posts/5/comments
@@ -125,7 +139,11 @@ namespace BagaarBlogApi.Controllers
             }
             else if (postId != createComment.PostId)
             {
-                return BadRequest("Inconsistent ids");
+                return BadRequest(new
+                {
+                    status = HttpStatusCode.BadRequest,
+                    message = "Inconsistent ids"
+                });
             }
 
             Comment comment = new Comment
