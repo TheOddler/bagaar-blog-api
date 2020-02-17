@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BagaarBlogApi.Repositories
 {
-    public abstract class AbstractRepository<T> : IRepository<T>
+    public abstract class Repository<T> : IRepository<T>
         where T : class
     {
         protected abstract DbSet<T> DbSet { get; }
         protected readonly BlogContext _context;
 
-        public AbstractRepository(BlogContext context)
+        public Repository(BlogContext context)
         {
             _context = context;
         }

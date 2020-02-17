@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BagaarBlogApi.Models
 {
-    public class Post
+    public class Post : ITimestamped
     {
         // Entity framework knows Id and will make this the primary key
         public int Id { get; set; }
